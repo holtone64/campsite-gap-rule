@@ -1,15 +1,19 @@
 package CampsiteGapRule;
 
-import java.io.FileReader;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+/* Copyright (c) 2017 Eric Holton */
+
+/**
+ * @author holtone64
+ *
+ */
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -38,12 +42,20 @@ public class CampsiteAvailability {
 		processData();
 	}
 	
+	public List<Campsite> getCampsites() {
+		return campsites;
+	}
+	
+	public JSONObject getJsonObject() {
+		return jsonObj;
+	}
+	
 	public static JSONObject readInputFile(String inputFilePath) {
-		// convenience method to create a org.json.simple.JSONObject from input file
 		JSONParser parser = new JSONParser();
 		JSONObject jsonObj = null;
+		BufferedReader reader = new BufferedReader(new InputStreamReader(CampsiteAvailability.class.getResourceAsStream("/test-case.json")));
 		try {
-			Object inputFile = parser.parse(new FileReader(inputFilePath));
+			Object inputFile = parser.parse(reader);
 			jsonObj = (JSONObject) inputFile;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -62,7 +74,7 @@ public class CampsiteAvailability {
 		readGapRules();
 		readSearchDates();
 		
-		// put our new reservation in, run checkGapRules, and set our campsites' availability booleans to false based on the return list
+		// put our new reservation in, run checkInvalidatedCampsites, and set our campsites' availability booleans to false based on the return list
 		for (Campsite campsite: campsites) {
 			Reservation resevationToAdd = new Reservation();
 			resevationToAdd.setStartDate((LocalDate)searchDates.get("startDate"));
@@ -76,11 +88,11 @@ public class CampsiteAvailability {
 		}
 		
         // sort the reservations in each campsite based on our comparable set to the start date
-        List<Reservation> listToSort = new ArrayList();
+        List<Reservation> listToSort = new ArrayList<Reservation>();
     	for (Campsite campsite : campsites) {
     		listToSort = campsite.getReservations();
     		Collections.sort(listToSort);
-    		List<String> dates = new ArrayList();
+    		List<String> dates = new ArrayList<String>();
     		for (Reservation r : listToSort) {
     			dates.add(r.getStartDate().toString());
     		}
@@ -97,54 +109,24 @@ public class CampsiteAvailability {
 			}
 		}
 		
-		for (Campsite campsite : campsites) {
-			if (campsite.getAvailable()) {
-				System.out.println(campsite.getName());	
-			}
-		}
+		availabilityDisplay.displayAvailableCampsites(campsites);
 	}
 	
 	private void checkInvalidatedCampsites() {
 		// for each gap rule, for each reservation, check whether this reservation's start date minus the 
 		// previous reservation's end date == gapRule.  if so, pull campsite id and set campsite's availability boolean to false
-		// returns a list of campsit
-		invalidatedCampsiteIds = new ArrayList();
+		invalidatedCampsiteIds = new ArrayList<Long>();
 		for (Long gapSize : gapRules) {
 			for (Campsite campsite : campsites) {
-				//for (int i = 1; i < reservations.size(); i++) {
-				List<Reservation> yar = campsite.getReservations();
-				String name = campsite.getName();
-				//Collections.sort(yar);
-				List<String> dates = new ArrayList();
-				for (Reservation r : yar) {
-					dates.add(r.getStartDate().toString());
-				}
-				//List<String> dates = campsite.getReservations();
 				for (int i = 1; i < campsite.getReservations().size(); i++) {
-					//long daysBetween = ChronoUnit.DAYS.between(reservations.get(i).getStartDate(), reservations.get(i -1).getEndDate());
 					long daysBetween = ChronoUnit.DAYS.between(campsite.getReservations().get(i -1).getEndDate(), 
 							campsite.getReservations().get(i).getStartDate());
-					List<String> testDates = new ArrayList<String>();
-					for (Reservation reservation : campsite.getReservations()) {
-						testDates.add(reservation.getStartDate().toString());
-					}
-					LocalDate yarsdf = campsite.getReservations().get(i).getStartDate();
-					String asdfsd = yarsdf.toString();
-					LocalDate sdfsadfd = campsite.getReservations().get(i -1).getEndDate();
-					String asddsfd = sdfsadfd.toString();
-					//long daysBetween = DAYS.between(dateBefore, dateAfter);
-					// need to consider campsites in addition to reservations and dates, too -- have to add res to each individual campsites' list of reservations
-					//int yar = reservations.get(i).getStartDate().compareTo(reservations.get(i -1).getEndDate());
-					//if (reservations.get(i).getStartDate().compareTo(reservations.get(i -1).getEndDate()) == gapSize) {
-					//if (ChronoUnit.DAYS.between(reservations.get(i).getStartDate(), reservations.get(i -1).getEndDate()) == gapSize) {
 					Long what = -daysBetween-1;
-					// Need to make sure our daysBetween value represents days between an existing resevation and a new one in addition
-					// to matching our gapSize before adding the campsite id to our invalidatedCampsiteIds list
+					// Need to make sure our daysBetween value represents days between an existing reservation and a new one in addition
+					// to matching our gapSize before adding the campsite id to our invalidatedCampsiteIds list. This prohibits
+					// false negatives coming from reservation already in the system that violate our gap rules.  
 					if ((daysBetween-1 == gapSize) && (!campsite.getReservations().get(i).getExistingReservation() ||
 							!campsite.getReservations().get(i-1).getExistingReservation())) {
-						//invalidatedCampsiteIds.add(reservations.get(i).getCampsiteId());
-						//invalidatedCampsiteIds.add(campsite.getReservations().get(i).getCampsiteId());
-						// want to avoid false positives coming from reservations that were already in the system.
 						invalidatedCampsiteIds.add(campsite.getId());
 					}				
 				}
@@ -170,21 +152,15 @@ public class CampsiteAvailability {
 	}
 	
 	public void readReservations() {
-//		reservations = new ArrayList<Reservation>();
         JSONArray jsonReservations = (JSONArray) jsonObj.get("reservations");
         Iterator<JSONObject> iterator = jsonReservations.iterator();
         while (iterator.hasNext()) {
         	Reservation reservation = new Reservation();
         	JSONObject jsonReservation = (JSONObject)iterator.next();
         	Long campsiteId = (Long)jsonReservation.get("campsiteId");
-        	//String startDateString = (String)jsonReservation.get("startDate");
-        	//DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
-        	//LocalDate startDate = new LocalDate();
-        	//LocalDate endDate = new LocalDate();
         	LocalDate startDate = null;
         	LocalDate endDate = null;
         	try {
-        		//startDate = dateFormat.parse((String)jsonReservation.get("startDate"));
         		// if the dates are in the format 'yyyy-mm-dd', we do not need to use the DateTimeFormatter
         		startDate = LocalDate.parse((String)jsonReservation.get("startDate"));
         		endDate = LocalDate.parse((String)jsonReservation.get("endDate"));
@@ -214,7 +190,7 @@ public class CampsiteAvailability {
 	}
 	
 	public void readSearchDates() {
-		searchDates = new HashMap();
+		searchDates = new HashMap<String, LocalDate>();
 		JSONObject jsonSearchDate = (JSONObject)jsonObj.get("search");
     	LocalDate startDate = null;
     	LocalDate endDate = null;

@@ -1,5 +1,12 @@
 package CampsiteGapRule;
 
+/* Copyright (c) 2017 Eric Holton */
+
+/**
+ * @author holtone64
+ *
+ */
+
 import java.time.LocalDate;
 import java.util.Date;
 
@@ -54,22 +61,6 @@ public class Reservation implements Comparable<Reservation> {
 	}
 	
 	public int compareTo(Reservation reservation) {
-		int what = startDate.compareTo(reservation.getStartDate());
-	    //return startDate.compareTo(reservation.getStartDate());
-//	    int cmp = (startDate.getYear()- reservation.getStartDate().getYear());
-//	    if (cmp == 0) {
-//	        cmp = (startDate.getMonthValue()- reservation.getStartDate().getMonthValue());
-//	        if (cmp == 0) {
-//	            cmp = (startDate.getDayOfMonth() - reservation.getStartDate().getDayOfMonth());
-//	        }
-//	    }
-//	    return cmp;
-//        if (startDate.isBefore(reservation.getStartDate())) {
-//            return -1;
-//        } else {
-//            return 1;
-//        }
- //   }
 		return startDate.compareTo(reservation.getStartDate());
 	}
 }

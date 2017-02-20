@@ -7,11 +7,37 @@
   <!-- Output to jar format -->
   <packaging>jar</packaging>
   <description>basic implementation of a campsite gap rule that disallows the creation of schedule gaps of a certain size</description>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
    <build>
     <plugins>
       <plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-surefire-plugin</artifactId>
+	    <version>2.12.4</version>
+	  </plugin>
+	  <plugin>
+	     <groupId>org.codehaus.mojo</groupId>
+	     <artifactId>exec-maven-plugin</artifactId>
+	     <version>1.5.0</version>
+	     <executions>
+	         <execution>
+	            <id>run-java</id>
+	            <phase>package</phase>
+	            <goals>
+	                <goal>java</goal>
+	            </goals>
+	         </execution>
+	      </executions>
+	      <configuration>
+	           <mainClass>CampsiteGapRule.App</mainClass>
+	      </configuration>
+	  </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
         <configuration>
           <archive>
             <manifest>
@@ -21,6 +47,31 @@
           </archive>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+          <archive>
+	          <manifest>
+	            <addClasspath>true</addClasspath>
+	            <classpathPrefix>lib/</classpathPrefix>
+	            <mainClass>CampsiteGapRule.App</mainClass>
+	          </manifest>
+          </archive>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id> <!-- this is used for inheritance merges -->
+            <phase>package</phase> <!-- bind to the packaging phase -->
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
   <dependencies>
@@ -28,6 +79,19 @@
 		    <groupId>com.googlecode.json-simple</groupId>
 		    <artifactId>json-simple</artifactId>
 		    <version>1.1</version>
+	  </dependency>
+	  <!-- https://mvnrepository.com/artifact/junit/junit -->
+	  <dependency>
+	      <groupId>junit</groupId>
+	      <artifactId>junit</artifactId>
+	      <version>4.12</version>
+	      <scope>test</scope>
+	  </dependency>
+	  <!-- https://mvnrepository.com/artifact/org.codehaus.mojo/exec-maven-plugin -->
+	  <dependency>
+	      <groupId>org.codehaus.mojo</groupId>
+	      <artifactId>exec-maven-plugin</artifactId>
+	      <version>1.5.0</version>
 	  </dependency>
   </dependencies>
 </project>

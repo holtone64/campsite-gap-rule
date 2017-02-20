@@ -1,5 +1,12 @@
 package CampsiteGapRule;
 
+/* Copyright (c) 2017 Eric Holton */
+
+/**
+ * @author holtone64
+ *
+ */
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,26 +53,9 @@ public class Campsite {
 	
 	public boolean addReservation(Reservation reservationToAdd) {
 		// Check for existing reservation, and if one exists in our target date range, return false.
-		// Also return false if our new Reservation's starting date is between the start and end date of each existing reservation,
-		// or if the new reservation's start or ending date is the same as
-		// make sure the reservation to add  does not start in the middle of an existing reservation, and make sure each existing 
-		// reservation does not start in the middle of our reservation to add
+		// Also return false if our new Reservation's starting date is between the start and end date of an existing reservation.
 		// since we are using LocalDates instead of LocalDateTimes, we can use .equals() for equivalence comparisons
 		for (Reservation existingRes : reservations) {
-//			if ((reservationToAdd.getStartDate().isAfter(existingRes.getStartDate())) ||
-//					(reservationToAdd.getStartDate().equals(existingRes.getStartDate()))) {
-//				if ((reservationToAdd.getStartDate().isBefore(existingRes.getEndDate())) ||
-//						(reservationToAdd.getStartDate().equals(existingRes.getEndDate()))) {
-//					return false;
-//				}
-//			}
-//			if ((existingRes.getStartDate().isAfter(reservationToAdd.getStartDate())) ||
-//					(existingRes.getStartDate().equals(reservationToAdd.getStartDate()))) {
-//				if ((existingRes.getStartDate().isBefore(reservationToAdd.getEndDate())) ||
-//						(existingRes.getStartDate().equals(reservationToAdd.getEndDate()))) {
-//					return false;
-//				}			
-//			}
 			if (reservationToAdd.getStartDate().isAfter(existingRes.getStartDate())) {
 				if (reservationToAdd.getStartDate().isBefore(existingRes.getEndDate())) {
 					return false;
