@@ -1,9 +1,9 @@
 package CampsiteGapRule;
 
+/* Copyright (c) 2017 Eric Holton, All rights reserved */
+
 import java.util.List;
 import java.util.Scanner;
-
-/* Copyright (c) 2017 Eric Holton */
 
 /**
  * @author holtone64
@@ -11,6 +11,7 @@ import java.util.Scanner;
  */
 
 public class AvailabilityDisplay {
+	private Scanner scanner;
 	// the main purpose of this class is to separate the UI from the manager for extensibility and threading concerns
 	
 	public void displayAvailableCampsites(List<Campsite> campsites) {
@@ -23,8 +24,15 @@ public class AvailabilityDisplay {
 	
 	public String queryJsonPath() {
 		System.out.println("Enter the path to a JSON file");	
-		Scanner scanner = new Scanner(System.in);
-		String JsonPath = scanner.next();
+		String JsonPath = "";
+		try {
+		scanner = new Scanner(System.in);
+		JsonPath = scanner.next();
+		} finally {
+			 if (scanner != null) {
+			        scanner.close();
+			 }
+		}
 		return JsonPath;
 	}
 }

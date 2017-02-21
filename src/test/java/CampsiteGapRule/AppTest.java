@@ -1,41 +1,21 @@
 package CampsiteGapRule;
 
-/* Copyright (c) 2017 Eric Holton */
-
-import org.junit.Test;
-import org.junit.runner.JUnitCore;
+/* Copyright (c) 2017 Eric Holton, All rights reserved */
 
 import junit.framework.TestCase;
-
-import static org.junit.Assert.assertEquals;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-
 public class AppTest extends TestCase{
-	private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 	private CampsiteAvailability campsiteAvailability;
-	
-//	@Test
-//	public static void main(String[] args) throws Exception {                    
-//	       JUnitCore.main("CampsiteGapRule"); 
-//	       
-//			CampsiteAvailability campsiteAvailability = 
-//					new CampsiteAvailability(CampsiteAvailability.readInputFile("/test-case.json"),
-//							new AvailabilityDisplay());
-//	}
 	
 	public void testFileRead() throws Exception {
 		// attempt to read in our sample JSON file. 
 		campsiteAvailability = 
 		new CampsiteAvailability(CampsiteAvailability.readInputFile("/test-case.json"),
 				new AvailabilityDisplay());
-		// make sure the JsonObject is not empty -- if it is not, we were able to read some data out of the json file
+		// make sure the JsonObject is not null or empty -- if it is not, we were able to read some data out of the json file
+		assertTrue(campsiteAvailability.getJsonObject() != null);
 		assertTrue(!campsiteAvailability.getJsonObject().isEmpty());
 	}
 	
@@ -61,7 +41,27 @@ public class AppTest extends TestCase{
 		assertEquals(knownAvailableCampsiteIds, availableCampsiteIds);
 	}
 	
+	public void testCampsiteListPopulation() {
+		campsiteAvailability = 
+				new CampsiteAvailability(CampsiteAvailability.readInputFile("/test-case.json"),
+						new AvailabilityDisplay());
+		
+		assertTrue(campsiteAvailability.getCampsites() != null);
+		assertTrue(!campsiteAvailability.getCampsites().isEmpty());
+	}
 	
-	
-	
+	public void testCampsiteValidNames() {
+		// make sure we have valid names so return values make sense to the user
+		campsiteAvailability = 
+				new CampsiteAvailability(CampsiteAvailability.readInputFile("/test-case.json"),
+						new AvailabilityDisplay());
+		
+		List<Campsite> campsites = campsiteAvailability.getCampsites();
+		List<Long> availableCampsiteIds = new ArrayList<Long>();
+		for (Campsite campsite : campsites) {
+			assertTrue(campsite.getName() != null);
+			assertTrue(campsite.getName().length() > 0);
+			availableCampsiteIds.add(campsite.getId());
+		}	
+	}	
 }

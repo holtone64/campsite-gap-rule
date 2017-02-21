@@ -1,6 +1,6 @@
 package CampsiteGapRule;
 
-/* Copyright (c) 2017 Eric Holton */
+/* Copyright (c) 2017 Eric Holton, All rights reserved */
 
 /**
  * @author holtone64
