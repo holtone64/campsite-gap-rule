@@ -9,8 +9,17 @@ import junit.framework.TestCase;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+
 public class AppTest extends TestCase{
-	CampsiteAvailability campsiteAvailability;
+	private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+	private CampsiteAvailability campsiteAvailability;
 	
 //	@Test
 //	public static void main(String[] args) throws Exception {                    
@@ -26,16 +35,33 @@ public class AppTest extends TestCase{
 		campsiteAvailability = 
 		new CampsiteAvailability(CampsiteAvailability.readInputFile("/test-case.json"),
 				new AvailabilityDisplay());
-		// make sure the JsonObject is not empty
-		assertTrue(!campsiteAvailability.getJsonObject().isEmpty());;
-		
+		// make sure the JsonObject is not empty -- if it is not, we were able to read some data out of the json file
+		assertTrue(!campsiteAvailability.getJsonObject().isEmpty());
 	}
 	
-	public void testCampsiteNames() throws Exception {
-		for (Campsite campsite : campsiteAvailability.getCampsites()) {
-			assertTrue(!campsite.getName().isEmpty());
+	public void testAvailability() throws Exception {
+		// test to make sure our displayed list of available campsites from the test file is correct
+		campsiteAvailability = 
+				new CampsiteAvailability(CampsiteAvailability.readInputFile("/test-case.json"),
+						new AvailabilityDisplay());
+		
+		List<Long> knownAvailableCampsiteIds = new ArrayList<Long>();
+		knownAvailableCampsiteIds.add((long) 5);
+		knownAvailableCampsiteIds.add((long) 6);
+		knownAvailableCampsiteIds.add((long) 8);
+		knownAvailableCampsiteIds.add((long) 9);
+		
+		List<Campsite> campsites = campsiteAvailability.getCampsites();
+		List<Long> availableCampsiteIds = new ArrayList<Long>();
+		for (Campsite campsite : campsites) {
+			if (campsite.getAvailable()) {
+				availableCampsiteIds.add(campsite.getId());
+			}
 		}
+		assertEquals(knownAvailableCampsiteIds, availableCampsiteIds);
 	}
+	
+	
 	
 	
 }

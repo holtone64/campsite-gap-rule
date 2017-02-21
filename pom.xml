@@ -2,9 +2,8 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>campsiteGapRule</groupId>
   <artifactId>campsiteGapRule</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.3</version>
   <name>campsite-gap-rule</name>
-  <!-- Output to jar format -->
   <packaging>jar</packaging>
   <description>basic implementation of a campsite gap rule that disallows the creation of schedule gaps of a certain size</description>
   <properties>

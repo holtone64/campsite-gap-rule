@@ -1,6 +1,7 @@
 package CampsiteGapRule;
 
 import java.util.List;
+import java.util.Scanner;
 
 /* Copyright (c) 2017 Eric Holton */
 
@@ -18,5 +19,12 @@ public class AvailabilityDisplay {
 				System.out.println(campsite.getName());	
 			}
 		}
+	}
+	
+	public String queryJsonPath() {
+		System.out.println("Enter the path to a JSON file");	
+		Scanner scanner = new Scanner(System.in);
+		String JsonPath = scanner.next();
+		return JsonPath;
 	}
 }

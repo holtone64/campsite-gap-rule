@@ -42,6 +42,10 @@ public class CampsiteAvailability {
 		processData();
 	}
 	
+	public CampsiteAvailability(AvailabilityDisplay availabilityDisplay) {
+		this.availabilityDisplay = availabilityDisplay;
+	}
+	
 	public List<Campsite> getCampsites() {
 		return campsites;
 	}
@@ -50,11 +54,30 @@ public class CampsiteAvailability {
 		return jsonObj;
 	}
 	
+	public AvailabilityDisplay getAvailabilityDisplay() {
+		return availabilityDisplay;
+	}
+	
+	public void setJsonObject(String jsonPath) {
+		jsonObj = readInputFile(jsonPath);
+		processData();
+	}
+	
+	public List<String> getAvailableCampsites() {
+		List<String> availableCampsiteNames = new ArrayList<String>();
+		for (Campsite campsite : campsites) {
+			if (campsite.getAvailable()) {
+				availableCampsiteNames.add(campsite.getName());	
+			}
+		}
+		return availableCampsiteNames;
+	}
+	
 	public static JSONObject readInputFile(String inputFilePath) {
 		JSONParser parser = new JSONParser();
 		JSONObject jsonObj = null;
-		BufferedReader reader = new BufferedReader(new InputStreamReader(CampsiteAvailability.class.getResourceAsStream("/test-case.json")));
 		try {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(CampsiteAvailability.class.getResourceAsStream(inputFilePath)));
 			Object inputFile = parser.parse(reader);
 			jsonObj = (JSONObject) inputFile;
 		} catch (Exception e) {
@@ -69,47 +92,52 @@ public class CampsiteAvailability {
 	}
 	
 	private void processData() {
-		readCampsites();
-		readReservations();
-		readGapRules();
-		readSearchDates();
-		
-		// put our new reservation in, run checkInvalidatedCampsites, and set our campsites' availability booleans to false based on the return list
-		for (Campsite campsite: campsites) {
-			Reservation resevationToAdd = new Reservation();
-			resevationToAdd.setStartDate((LocalDate)searchDates.get("startDate"));
-			resevationToAdd.setEndDate((LocalDate)searchDates.get("endDate"));
-			resevationToAdd.setCampsiteId(campsite.getId());
-			resevationToAdd.setExistingReservation(false);
-			boolean reservationAdded = campsite.addReservation(resevationToAdd);
-			if (!reservationAdded) {
-				campsite.setAvailable(false);
-			}
-		}
-		
-        // sort the reservations in each campsite based on our comparable set to the start date
-        List<Reservation> listToSort = new ArrayList<Reservation>();
-    	for (Campsite campsite : campsites) {
-    		listToSort = campsite.getReservations();
-    		Collections.sort(listToSort);
-    		List<String> dates = new ArrayList<String>();
-    		for (Reservation r : listToSort) {
-    			dates.add(r.getStartDate().toString());
-    		}
-    		campsite.setReservations(listToSort);
-    	}
-		
-		checkInvalidatedCampsites();
-		
-		for (Campsite campsite : campsites) {
-			for (Long campsiteId : invalidatedCampsiteIds) {
-				if (campsite.getId() == campsiteId) {
+		// stop processing if the jsonObj Object is currently empty
+		if (jsonObj != null) {
+			readCampsites();
+			readReservations();
+			readGapRules();
+			readSearchDates();
+			
+			// put our new reservation in, run checkInvalidatedCampsites, and set our campsites' availability booleans to false based on the return list
+			for (Campsite campsite: campsites) {
+				Reservation resevationToAdd = new Reservation();
+				resevationToAdd.setStartDate((LocalDate)searchDates.get("startDate"));
+				resevationToAdd.setEndDate((LocalDate)searchDates.get("endDate"));
+				resevationToAdd.setCampsiteId(campsite.getId());
+				resevationToAdd.setExistingReservation(false);
+				boolean reservationAdded = campsite.addReservation(resevationToAdd);
+				if (!reservationAdded) {
 					campsite.setAvailable(false);
 				}
 			}
+			
+	        // sort the reservations in each campsite based on our comparable set to the start date
+	        List<Reservation> listToSort = new ArrayList<Reservation>();
+	    	for (Campsite campsite : campsites) {
+	    		listToSort = campsite.getReservations();
+	    		Collections.sort(listToSort);
+	    		List<String> dates = new ArrayList<String>();
+	    		for (Reservation r : listToSort) {
+	    			dates.add(r.getStartDate().toString());
+	    		}
+	    		campsite.setReservations(listToSort);
+	    	}
+			
+			checkInvalidatedCampsites();
+			
+			for (Campsite campsite : campsites) {
+				for (Long campsiteId : invalidatedCampsiteIds) {
+					if (campsite.getId() == campsiteId) {
+						campsite.setAvailable(false);
+					}
+				}
+			}
+			
+			//availabilityDisplay.displayAvailableCampsites(campsites);
+		} else {
+			System.out.println("JSON Object is empty");
 		}
-		
-		availabilityDisplay.displayAvailableCampsites(campsites);
 	}
 	
 	private void checkInvalidatedCampsites() {
@@ -119,23 +147,28 @@ public class CampsiteAvailability {
 		for (Long gapSize : gapRules) {
 			for (Campsite campsite : campsites) {
 				for (int i = 1; i < campsite.getReservations().size(); i++) {
-					long daysBetween = ChronoUnit.DAYS.between(campsite.getReservations().get(i -1).getEndDate(), 
-							campsite.getReservations().get(i).getStartDate());
-					Long what = -daysBetween-1;
+					// don't bother doing date comparisons if we're not looking at a new reservation
 					// Need to make sure our daysBetween value represents days between an existing reservation and a new one in addition
 					// to matching our gapSize before adding the campsite id to our invalidatedCampsiteIds list. This prohibits
-					// false negatives coming from reservation already in the system that violate our gap rules.  
-					if ((daysBetween-1 == gapSize) && (!campsite.getReservations().get(i).getExistingReservation() ||
-							!campsite.getReservations().get(i-1).getExistingReservation())) {
-						invalidatedCampsiteIds.add(campsite.getId());
-					}				
+					// false negatives coming from reservation already in the system that violate our gap rules. 
+					if (!campsite.getReservations().get(i).getExistingReservation() ||
+							!campsite.getReservations().get(i-1).getExistingReservation()) {				
+						long daysBetween = ChronoUnit.DAYS.between(campsite.getReservations().get(i -1).getEndDate(), 
+								campsite.getReservations().get(i).getStartDate()); 
+						if (daysBetween-1 == gapSize) {
+							invalidatedCampsiteIds.add(campsite.getId());
+						}	
+					}
 				}
 			}
 		}
 	}
 	
 	private void readCampsites() {
+		// want to make sure our campsite ids match up with the indeces in the campsite list to avoid unnecessary looping later
+		
 		campsites = new ArrayList<Campsite>();
+		
         JSONArray jsonCampsites = (JSONArray) jsonObj.get("campsites");
         Iterator<JSONObject> iterator = jsonCampsites.iterator();
         while (iterator.hasNext()) {
@@ -172,6 +205,8 @@ public class CampsiteAvailability {
         	reservation.setEndDate(endDate);
         	reservation.setCampsiteId(campsiteId);
         	reservation.setExistingReservation(true);
+        	
+        	// depending on the size of our campsites list, may need to optimize this to use the campsite ids as indeces to avoid this loop
         	for (Campsite campsite : campsites) {
         		if (campsite.getId().equals(campsiteId)) {
         			campsite.addReservation(reservation);
