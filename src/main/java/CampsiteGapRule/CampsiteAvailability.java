@@ -58,11 +58,6 @@ public class CampsiteAvailability {
 		return availabilityDisplay;
 	}
 	
-	public void setJsonObject(String jsonPath) {
-		jsonObj = readInputFile(jsonPath);
-		processData();
-	}
-	
 	public List<String> getAvailableCampsites() {
 		List<String> availableCampsiteNames = new ArrayList<String>();
 		for (Campsite campsite : campsites) {
@@ -71,6 +66,19 @@ public class CampsiteAvailability {
 			}
 		}
 		return availableCampsiteNames;
+	}
+	
+	public List<Long> getGapRules() {
+		return gapRules;
+	}
+	
+	public HashMap<String, LocalDate> getSearchDates() {
+		return searchDates;
+	}
+	
+	public void setJsonObject(String jsonPath) {
+		jsonObj = readInputFile(jsonPath);
+		processData();
 	}
 	
 	public static JSONObject readInputFile(String inputFilePath) {

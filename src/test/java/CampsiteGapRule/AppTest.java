@@ -41,7 +41,7 @@ public class AppTest extends TestCase{
 		assertEquals(knownAvailableCampsiteIds, availableCampsiteIds);
 	}
 	
-	public void testCampsiteListPopulation() {
+	public void testCampsiteListPopulation() throws Exception {
 		campsiteAvailability = 
 				new CampsiteAvailability(CampsiteAvailability.readInputFile("/test-case.json"),
 						new AvailabilityDisplay());
@@ -50,7 +50,7 @@ public class AppTest extends TestCase{
 		assertTrue(!campsiteAvailability.getCampsites().isEmpty());
 	}
 	
-	public void testCampsiteValidNames() {
+	public void testCampsiteValidNames() throws Exception {
 		// make sure we have valid names so return values make sense to the user
 		campsiteAvailability = 
 				new CampsiteAvailability(CampsiteAvailability.readInputFile("/test-case.json"),
@@ -63,5 +63,34 @@ public class AppTest extends TestCase{
 			assertTrue(campsite.getName().length() > 0);
 			availableCampsiteIds.add(campsite.getId());
 		}	
-	}	
+	}
+	
+	public void testGapRulesAdded() throws Exception {
+		campsiteAvailability = 
+				new CampsiteAvailability(CampsiteAvailability.readInputFile("/test-case.json"),
+						new AvailabilityDisplay());
+		
+		assertTrue(campsiteAvailability.getGapRules() != null);
+		assertTrue(campsiteAvailability.getGapRules().size() > 0);
+	}
+	
+	public void testSearchDatesAdded() throws Exception {
+		campsiteAvailability = 
+				new CampsiteAvailability(CampsiteAvailability.readInputFile("/test-case.json"),
+						new AvailabilityDisplay());
+		
+		assertTrue(campsiteAvailability.getSearchDates() != null);
+		assertTrue(campsiteAvailability.getSearchDates().size() > 0);
+	}
+	
+	public void testReservationsAdded() throws Exception {
+		campsiteAvailability = 
+				new CampsiteAvailability(CampsiteAvailability.readInputFile("/test-case.json"),
+						new AvailabilityDisplay());
+		
+		for (Campsite campsite : campsiteAvailability.getCampsites()) {
+			assertTrue(campsite.getReservations() != null);
+			assertTrue(campsite.getReservations().size() > 0);
+		}
+	}
 }

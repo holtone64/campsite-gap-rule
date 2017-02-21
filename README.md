@@ -11,11 +11,15 @@ I did not create a separate project/jar for the test cases to avoid unnecessary 
 
 Building and running: 
 
-Maven is used as the build system.  In order to run the program and tests associated with this program in Eclipse, first download the project via the git URL, import the project as a Maven project in Eclipse.  Then, create a new debug/run configuration of the "Maven Build" configuration type.  Next, enter "clean package" into the "Goals" field.  In order to skip the tests, check the "skip tests" checkbox in the run configuration dialog box or add "-Dmaven.test.skip=true" to the 'goals' text box.  
+Maven is used as the build system.  In order to run the program and tests associated with this program in Eclipse, first download the project via the git URL, import the project as a Maven project in Eclipse.  Then, create a new debug/run configuration of the "Maven Build" configuration type.  Next, enter "clean package" into the "Goals" field.  In order to skip the tests, check the "skip tests" checkbox in the run configuration dialog box or add "-Dmaven.test.skip=true" to the 'goals' text box.
+
+When the program asks for the path to a valid JSON file, you can enter "/test-case.json" to see the test values, or another valid path if you have another JSON file with the correct keys on your system.  The original test file should be packaged properly by Maven.    
 
 You can also use the Maven command line tool by cd'ing into the project directory and entering "mvn clean package" if you have Maven installed.  To skip tests in the command line, the "-Dmaven.test.skip=true" flag can be used again.   
 
-Maven will construct a jar and add it to the /target folder. The program will automatically run in the 'package' phase of deployment   
+Maven will construct a jar and add it to the /target folder. The program will automatically run in the 'package' phase of deployment
+
+If you want to run the jar directly, navigate to the /target folder and execute the "campsiteGapRule-0.3-jar-with-dependencies" jar
 
 The App class demonstrates how to properly initialize and use the CamspiteAvailability and AvailabilityDisplay classes. The CampsiteAvailabilityQuery class can accept a org.json.simple.JSONObject as well as a file path as a String as constructor arguments. The CampsiteAvailability object can be  initialized without a JsonObject or the JSONObject's path as a String, but the JSONObject must be added later.  If the CampsiteAvailability object has been initialized without the JSON, the JSON can be added via the AvailabilityDisplay.queryJsonPath() method that asks the user for the path to a JSON file in the console.   
       
