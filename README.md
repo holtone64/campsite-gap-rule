@@ -11,7 +11,7 @@ I did not create a separate project/jar for the test cases to avoid unnecessary 
 
 Building and running: 
 
-Maven is used as the build system.  In order to run the program and tests associated with this program in Eclipse, first create a new debug/run configuration of the "Maven Build" configuration type.   In order to run the tests cases and the program, enter "clean package" into the "Goals" field.  In order to skip the tests, check the "skip tests" checkbox in the run configuration dialog box or add "-Dmaven.test.skip=true" to the 'goals' text box.  
+Maven is used as the build system.  In order to run the program and tests associated with this program in Eclipse, first download the project via the git URL, import the project as a Maven project in Eclipse.  Then, create a new debug/run configuration of the "Maven Build" configuration type.  Next, enter "clean package" into the "Goals" field.  In order to skip the tests, check the "skip tests" checkbox in the run configuration dialog box or add "-Dmaven.test.skip=true" to the 'goals' text box.  
 
 You can also use the Maven command line tool by cd'ing into the project directory and entering "mvn clean package" if you have Maven installed.  To skip tests in the command line, the "-Dmaven.test.skip=true" flag can be used again.   
 
